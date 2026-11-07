@@ -1,7 +1,7 @@
 # One Dockerfile, one target per Node service. Build from the repo root:
 #   docker build --target core .
 #   docker build --target slack-app .
-FROM node:24-bookworm-slim AS base
+FROM node:25-bookworm-slim AS base
 WORKDIR /app
 ENV NODE_ENV=production
 COPY package.json package-lock.json ./
