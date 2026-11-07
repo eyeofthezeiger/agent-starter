@@ -1,0 +1,39 @@
+{
+  "name": "agent-starter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Starter for a chief-of-staff agent system: Slack and Chrome intake, a plain-code gate, a Postgres inbox and outbox, approvals, an audit log and a pause switch. AI triage is stubbed.",
+  "license": "MIT",
+  "author": "Matt Zeiger",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "packages/shared",
+    "packages/core",
+    "packages/slack-app",
+    "packages/extension"
+  ],
+  "scripts": {
+    "up": "docker compose up -d --build",
+    "down": "docker compose --profile worker down",
+    "seed": "docker compose run --rm core npm run seed -w @cos/core",
+    "logs": "docker compose logs -f core slack-app",
+    "lint": "eslint . && npm run typecheck",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "eval": "npm run eval -w @cos/core",
+    "slack:manifest": "npm run slack:manifest -w @cos/slack-app"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.6",
+    "eslint": "^10.14.0",
+    "globals": "^17.14.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^5.1.0"
+  }
+}

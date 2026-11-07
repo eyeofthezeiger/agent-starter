@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+*.log
+.env
+.env.*
+!.env.example
+# Per-person context files hold real work context. Only the template is committed.
+context/*.md
+!context/README.md
+!context/person.template.md
+# Worker scratch space
+workers/claude-code/workspace/
+.DS_Store
+# Generated from agent.config.json by `npm run slack:manifest`
+packages/slack-app/manifest.generated.json

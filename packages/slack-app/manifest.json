@@ -1,0 +1,63 @@
+{
+  "_comment": "Template. Run `npm run slack:manifest` to fill in the command and names from agent.config.json.",
+  "_metadata": {
+    "major_version": 2,
+    "minor_version": 1
+  },
+  "display_information": {
+    "name": "Chief of Staff",
+    "description": "Takes work requests into a reviewed queue. Agents propose, people approve.",
+    "background_color": "#2c2d30"
+  },
+  "features": {
+    "app_home": {
+      "home_tab_enabled": true,
+      "messages_tab_enabled": true,
+      "messages_tab_read_only_enabled": true
+    },
+    "bot_user": {
+      "display_name": "chief-of-staff",
+      "always_online": false
+    },
+    "slash_commands": [
+      {
+        "command": "/ask",
+        "description": "Send the owner a request. It lands in a reviewed queue.",
+        "usage_hint": "what you need, and by when",
+        "should_escape": false
+      }
+    ],
+    "shortcuts": [
+      {
+        "name": "Send to queue",
+        "type": "message",
+        "callback_id": "send_to_queue",
+        "description": "Send this message to the owner's request queue"
+      }
+    ]
+  },
+  "oauth_config": {
+    "scopes": {
+      "bot": [
+        "commands",
+        "chat:write",
+        "im:write",
+        "usergroups:read",
+        "users:read"
+      ]
+    }
+  },
+  "settings": {
+    "event_subscriptions": {
+      "bot_events": [
+        "app_home_opened"
+      ]
+    },
+    "interactivity": {
+      "is_enabled": true
+    },
+    "org_deploy_enabled": false,
+    "socket_mode_enabled": true,
+    "token_rotation_enabled": false
+  }
+}

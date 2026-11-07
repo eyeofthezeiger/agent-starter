@@ -1,0 +1,105 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Every job sets every variable the core's config requires (DATABASE_URL,
+# CORE_API_TOKEN), even when the job's own steps don't read it, so adding a
+# step that loads the config never fails on a missing variable.
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: cos
+          POSTGRES_PASSWORD: cos
+          POSTGRES_DB: cos_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U cos -d cos_test"
+          --health-interval 2s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgres://cos:cos@localhost:5432/cos_test
+      TEST_DATABASE_URL: postgres://cos:cos@localhost:5432/cos_test
+      CORE_API_TOKEN: ci-only-token-not-a-secret
+      DRY_RUN: 'true'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Lint and typecheck
+        run: npm run lint
+      - name: Tests (unit + Postgres integration)
+        run: npm test
+      - name: Build the Chrome extension
+        run: npm run build
+      - name: Build the Slack manifest from agent.config.json
+        run: npm run slack:manifest
+      - name: Triage eval (fake triage baseline)
+        run: npm run eval
+
+  smoke:
+    # Boots the real core against a throwaway Postgres, loads the seed and checks health.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: cos
+          POSTGRES_PASSWORD: cos
+          POSTGRES_DB: cos
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U cos -d cos"
+          --health-interval 2s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgres://cos:cos@localhost:5432/cos
+      CORE_API_TOKEN: ci-only-token-not-a-secret
+      DRY_RUN: 'true'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run migrate -w @cos/core
+      - name: Start the core and wait for /health
+        run: |
+          npm run start -w @cos/core > core.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS localhost:8787/health && exit 0; sleep 1; done
+          cat core.log; exit 1
+      - run: npm run seed -w @cos/core
+      - name: Queue is reachable with the token
+        run: curl -fsS -H "authorization: Bearer $CORE_API_TOKEN" localhost:8787/api/queue | head -c 300
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: postgres://cos:cos@localhost:5432/cos
+      CORE_API_TOKEN: ci-only-token-not-a-secret
+    steps:
+      - uses: actions/checkout@v5
+      - run: docker build --target core -t agent-starter-core .
+      - run: docker build --target slack-app -t agent-starter-slack .
+      - run: docker build -t agent-starter-worker workers/claude-code

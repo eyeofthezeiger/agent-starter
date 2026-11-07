@@ -1,0 +1,37 @@
+{
+  "owner": {
+    "name": "Your Name",
+    "slackUserId": "U00000000",
+    "contextFile": "context/me.md"
+  },
+  "team": {
+    "name": "Your team",
+    "approverSlackUserIds": [],
+    "allowedUsergroupId": ""
+  },
+  "slack": {
+    "appName": "Chief of Staff",
+    "botDisplayName": "chief-of-staff",
+    "command": "/ask"
+  },
+  "sources": {
+    "slack_command": "explicit",
+    "slack_shortcut": "explicit",
+    "slack_mention": "explicit",
+    "slack_dm": "explicit",
+    "slack_ambient": "inferred",
+    "chrome": "explicit",
+    "notes": "ignore",
+    "seed": "explicit"
+  },
+  "approvalTiers": {
+    "promoteAfterCorrectRuns": 5,
+    "jobs": {
+      "ask_owner": "read",
+      "context.store": "draft",
+      "morning_digest": "draft",
+      "jira.create_issue": "send_with_approval"
+    }
+  },
+  "skillPacks": ["marketing"]
+}

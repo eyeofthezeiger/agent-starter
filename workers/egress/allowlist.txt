@@ -1,0 +1,7 @@
+# Hosts the worker may reach, one per line. A leading dot includes subdomains.
+# Anything else is refused by the proxy. Add hosts on purpose, in a reviewed change.
+api.anthropic.com
+github.com
+.githubusercontent.com
+api.github.com
+registry.npmjs.org

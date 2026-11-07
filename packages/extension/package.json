@@ -1,0 +1,16 @@
+{
+  "name": "@cos/extension",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && cp -R static/. dist/",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@cos/shared": "*",
+    "@types/chrome": "^0.3.7"
+  }
+}

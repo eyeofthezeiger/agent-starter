@@ -1,0 +1,11 @@
+{
+  "_note": "Synthetic data only. Made-up Slack ids, people and links.",
+  "gateMembers": ["U0SEED01", "U0SEED02", "U0SEED03", "U0SEED04", "U0SEED05"],
+  "briefs": [
+    {
+      "kind": "meeting_brief",
+      "title": "Brief: Design review (synthetic), 2:00 PM",
+      "body": "*Attendees:* <@U0SEED01>, <@U0SEED04>\n*Open loops:* you owe U0SEED04 a review of the onboarding PR.\n*Agenda:* no agenda doc found.\n*Prep:* skim the onboarding PR before the call."
+    }
+  ]
+}

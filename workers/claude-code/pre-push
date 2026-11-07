@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Git pre-push hook for the worker: only agent/* branches may be pushed.
+# Main stays protected on GitHub too; this is a second, local check.
+set -euo pipefail
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+  case "$remote_ref" in
+    refs/heads/agent/*) ;;
+    *) echo "pre-push: refusing to push $remote_ref. Workers push only to agent/* branches." >&2; exit 1 ;;
+  esac
+done
+exit 0

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Chief of Staff</title>
+    <link rel="stylesheet" href="panel.css" />
+  </head>
+  <body>
+    <header>
+      <div class="row">
+        <strong>Chief of Staff</strong>
+        <span class="spacer"></span>
+        <button id="pause" type="button">Pause</button>
+        <button id="options" type="button" title="Settings">⚙</button>
+      </div>
+      <p id="status" class="meta">Connecting…</p>
+      <nav class="row">
+        <button type="button" data-tab="queue" class="active">Queue</button>
+        <button type="button" data-tab="briefs">Briefs</button>
+      </nav>
+    </header>
+    <p id="error" class="error" hidden></p>
+    <main id="list"></main>
+    <script type="module" src="sidepanel.js"></script>
+  </body>
+</html>

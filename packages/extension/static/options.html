@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Chief of Staff settings</title>
+    <link rel="stylesheet" href="panel.css" />
+  </head>
+  <body class="options">
+    <h1>Chief of Staff settings</h1>
+    <form>
+      <label>Core URL <input id="coreUrl" type="url" placeholder="http://localhost:8787" /></label>
+      <label>Core API token <input id="token" type="password" autocomplete="off" placeholder="CORE_API_TOKEN from .env" /></label>
+      <button class="primary" type="submit">Save</button>
+      <p id="saved" class="meta"></p>
+    </form>
+    <p class="meta">The token is stored only in this browser profile (chrome.storage.local).</p>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

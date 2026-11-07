@@ -1,0 +1,20 @@
+{
+  "name": "@cos/slack-app",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "slack:manifest": "tsx src/manifest-cli.ts"
+  },
+  "dependencies": {
+    "@cos/shared": "*",
+    "@slack/bolt": "^5.1.0",
+    "tsx": "^4.23.15"
+  },
+  "devDependencies": {}
+}

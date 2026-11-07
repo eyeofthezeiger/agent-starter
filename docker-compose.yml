@@ -1,0 +1,108 @@
+# Local stack. Every port binds to 127.0.0.1 only. Slack uses Socket Mode,
+# so nothing needs to be reachable from the internet.
+name: agent-starter
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cos}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-cos}
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [core-net]
+
+  core:
+    build:
+      context: .
+      target: core
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-cos}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cos}
+      CORE_HOST: 0.0.0.0
+    volumes:
+      # Edit agent.config.json or your context file, then `docker compose restart`.
+      - ./agent.config.json:/app/agent.config.json:ro
+      - ./context:/app/context:ro
+    ports:
+      - "127.0.0.1:${CORE_PORT:-8787}:8787"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8787/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks: [core-net]
+
+  slack-app:
+    build:
+      context: .
+      target: slack-app
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      CORE_URL: http://core:8787
+    volumes:
+      - ./agent.config.json:/app/agent.config.json:ro
+    depends_on:
+      core:
+        condition: service_healthy
+    networks: [core-net]
+
+  # --- Sandboxed coding worker: `make up-worker` ---
+  # No database, no Slack or Jira tokens, no host mounts except its own
+  # workspace folder. All egress goes through the allowlist proxy.
+  egress-proxy:
+    profiles: [worker]
+    image: ubuntu/squid:6.6-24.04_beta
+    restart: unless-stopped
+    volumes:
+      - ./workers/egress/squid.conf:/etc/squid/squid.conf:ro
+      - ./workers/egress/allowlist.txt:/etc/squid/allowlist.txt:ro
+    networks: [worker-net, egress-net]
+
+  worker:
+    profiles: [worker]
+    build:
+      context: ./workers/claude-code
+    environment:
+      WORKER_ENABLED: ${WORKER_ENABLED:-false}
+      WORKER_REPO_URL: ${WORKER_REPO_URL:-}
+      AGENT_GITHUB_TOKEN: ${AGENT_GITHUB_TOKEN:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      HTTPS_PROXY: http://egress-proxy:3128
+      HTTP_PROXY: http://egress-proxy:3128
+      NO_PROXY: ""
+    volumes:
+      - ./workers/claude-code/workspace:/workspace
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /home/agent
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    depends_on: [egress-proxy]
+    networks: [worker-net]
+
+networks:
+  core-net: {}
+  # internal: no route to the internet except through egress-proxy.
+  worker-net:
+    internal: true
+  egress-net: {}
+
+volumes:
+  pgdata: {}
