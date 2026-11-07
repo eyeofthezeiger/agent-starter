@@ -90,7 +90,8 @@ jobs:
           cat core.log; exit 1
       - run: npm run seed -w @cos/core
       - name: Queue is reachable with the token
-        run: curl -fsS -H "authorization: Bearer $CORE_API_TOKEN" localhost:8787/api/queue | head -c 300
+        run: |
+          curl -fsS -H "authorization: Bearer $CORE_API_TOKEN" localhost:8787/api/queue | head -c 300
 
   docker:
     runs-on: ubuntu-latest
