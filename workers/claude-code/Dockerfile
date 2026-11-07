@@ -1,7 +1,7 @@
 # Sandboxed coding worker: Claude Code in headless mode.
 # Runs as a non-root user, read-only root filesystem (see docker-compose.yml),
 # no production credentials, egress only through the allowlist proxy.
-FROM node:24-bookworm-slim
+FROM node:25-bookworm-slim
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends git ca-certificates jq \
